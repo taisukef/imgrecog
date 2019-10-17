@@ -1,0 +1,96 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>画像識別 Tensorflow.js</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.1"> </script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"> </script>
+<style>
+body {
+  margin: 0;
+  text-align: center;
+  font-family: sans-serif;
+}
+a {
+  color: gray !important;
+}
+h1 {
+  font-size: 5vw;
+}
+#predict {
+  text-align: center;
+  padding: 2vh;
+}
+#drop {
+  border: 2px solid gray;
+  width: 90vw;
+  min-height: 10em;
+  padding: 3vw;
+  margin: 5vw;
+  box-sizing: border-box;
+}
+#img {
+  height: 30vh;
+}
+</style>
+</head>
+<body>
+
+<script>
+window.onload = async function() {
+  const model = await mobilenet.load()
+  predict.innerHTML = "準備OK!"
+  // predict
+  const pred = async function() {
+    const img = document.getElementById('img')
+    const predictions = await model.classify(img)
+    let s = ''
+    for (const p of predictions) {
+      s += p.className + " " + (p.probability * 100).toFixed(2) + "%<br>\n"
+    }
+    predict.innerHTML = 'Predictions:<br>' + s
+  }
+
+  // drop
+	drop.addEventListener("dragover", function(e) {
+		e.preventDefault();
+	}, false);
+	drop.addEventListener("drop", function(e) {
+		var files = event.dataTransfer.files;
+		for (var i = 0; i < files.length; i++) {
+			var f = files[i];
+			loadFile(f);
+			break;
+		}
+		e.preventDefault();
+	}, false);
+	var loadFile = function(f) {
+		if (!f.type.match("image.*")) {
+			alert("画像ファイルではありません");
+			return;
+		}
+		var reader = new FileReader();
+		reader.onerror = function(e) {
+			alert("読み取り時にエラーが発生しました");
+		};
+		reader.onload = function(e) {
+			img.src = e.target.result;
+			img.onload = function() {
+        pred()
+			};
+		};
+		reader.readAsDataURL(f);
+	};
+
+}
+</script>
+<h1>ざっくりAI画像識別</h1>
+<div id="predict">しばらくお待ち下さい</div>
+<div id="drop">画像をファイルをココにドロップ<br>
+  <img id="img">
+</div>
+
+<div id=credit>
+  APP: <a href=https://fukuno.jig.jp/2643>福野泰介の一日一創</a><br>
+  BaseApp: <a href=https://github.com/tensorflow/tfjs-models/tree/master/mobilenet>Tensorflow.js x MobileNet - tfjs-models/mobilenet at master - tensorflow/tfjs-models</a><br>
+</div>
+
+</body>
+</html>
